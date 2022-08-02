@@ -74,5 +74,5 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
-Saved/Logs/*
+Saved/Logs/
 Binaries/Win64/UnrealEditor-LUTIA.dll
