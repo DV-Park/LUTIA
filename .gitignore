@@ -77,3 +77,6 @@ DerivedDataCache/*
 Saved/Logs/
 Binaries/Win64/UnrealEditor-LUTIA.dll
 Saved/Logs/LUTIA.log
+
+# Assets 
+Content/Assets/*
