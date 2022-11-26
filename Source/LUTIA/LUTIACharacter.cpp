@@ -60,9 +60,12 @@ void ALUTIACharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ALUTIACharacter::ShiftPressed);
+	PlayerInputComponent->BindAction("Run", IE_Released, this, &ALUTIACharacter::ShiftReleased);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &ALUTIACharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &ALUTIACharacter::MoveRight);
+	
 
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
@@ -106,10 +109,14 @@ void ALUTIACharacter::MoveForward(float Value)
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		
 
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+		if (IsShiftPressed)
+			AddMovementInput(Direction, Value);
+		else
+			AddMovementInput(Direction, Value * 0.4);
 	}
 }
 
@@ -120,10 +127,24 @@ void ALUTIACharacter::MoveRight(float Value)
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
 	
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
-		AddMovementInput(Direction, Value);
+		if (IsShiftPressed)
+			AddMovementInput(Direction, Value);
+		else
+			AddMovementInput(Direction, Value * 0.4);
 	}
+}
+
+void ALUTIACharacter::ShiftPressed()
+{
+	IsShiftPressed = true;
+}
+
+void ALUTIACharacter::ShiftReleased()
+{
+	IsShiftPressed = false;
 }
