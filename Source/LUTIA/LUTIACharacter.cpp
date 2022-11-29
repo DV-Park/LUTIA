@@ -39,7 +39,7 @@ ALUTIACharacter::ALUTIACharacter()
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
+	CameraBoom->TargetArmLength = DefaultArmLength; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
 	// Create a follow camera
@@ -74,6 +74,7 @@ void ALUTIACharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAxis("Turn Right / Left Gamepad", this, &ALUTIACharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("Look Up / Down Gamepad", this, &ALUTIACharacter::LookUpAtRate);
+	PlayerInputComponent->BindAxis("Camera Zoom In / Out", this, &ALUTIACharacter::CameraZoom);
 
 	// handle touch devices
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &ALUTIACharacter::TouchStarted);
@@ -137,6 +138,16 @@ void ALUTIACharacter::MoveRight(float Value)
 		else
 			AddMovementInput(Direction, Value * 0.4);
 	}
+}
+
+void ALUTIACharacter::CameraZoom(float Value)
+{
+	float armLength = CameraBoom->TargetArmLength;
+
+	if (armLength < MaxZoomLength && Value < 0)
+		CameraBoom->TargetArmLength -= Value * ZoomStep;
+	else if (armLength > MinZoomLength && Value > 0)
+		CameraBoom->TargetArmLength -= Value * ZoomStep;
 }
 
 void ALUTIACharacter::ShiftPressed()

@@ -45,6 +45,8 @@ protected:
 	 */
 	void LookUpAtRate(float Rate);
 
+	void CameraZoom(float Rate);
+
 	/** Handler for when a touch input begins. */
 	void TouchStarted(ETouchIndex::Type FingerIndex, FVector Location);
 
@@ -67,7 +69,19 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 public:
-	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = stats)
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "stats")
 	bool IsShiftPressed;
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Camera | Zoom")
+		float MinZoomLength = 150.f;
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Camera | Zoom")
+		float MaxZoomLength = 410.f;
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Camera | Zoom")
+		float DefaultArmLength = 400.f;
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Camera | Zoom")
+		float ZoomStep = 10.f;
 };
 
