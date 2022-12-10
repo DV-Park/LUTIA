@@ -62,6 +62,8 @@ void ALUTIACharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ALUTIACharacter::ShiftPressed);
 	PlayerInputComponent->BindAction("Run", IE_Released, this, &ALUTIACharacter::ShiftReleased);
+	PlayerInputComponent->BindAction("Communicate", IE_Pressed, this, &ALUTIACharacter::CommuPressed);
+	PlayerInputComponent->BindAction("Communicate", IE_Released, this, &ALUTIACharacter::CommuReleased);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &ALUTIACharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &ALUTIACharacter::MoveRight);
@@ -158,4 +160,14 @@ void ALUTIACharacter::ShiftPressed()
 void ALUTIACharacter::ShiftReleased()
 {
 	IsShiftPressed = false;
+}
+
+void ALUTIACharacter::CommuPressed()
+{
+	
+}
+
+
+void ALUTIACharacter::CommuReleased()
+{
 }

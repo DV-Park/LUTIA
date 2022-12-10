@@ -57,6 +57,10 @@ protected:
 
 	void ShiftReleased();
 
+	void CommuPressed();
+
+	void CommuReleased();
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
