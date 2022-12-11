@@ -56,6 +56,9 @@ Build/*
 !Build//
 Build//
 !Build//PakBlacklist.txt
+!Source/LUTIA/*
+!Source/LUTIA.Tartget.cs
+!Source/LUTIAEditor.Target.cs
 
 # Don't ignore icon files in Build
 !Build/*/.ico
@@ -84,3 +87,4 @@ Content/EuropeanHornbeam/*
 Content/MSPresets/*
 Content/Megascans/*
 Content/GothicTemple/*
+Source/*
