@@ -107,7 +107,7 @@ void ALUTIACharacter::LookUpAtRate(float Rate)
 
 void ALUTIACharacter::MoveForward(float Value)
 {
-	if ((Controller != nullptr) && (Value != 0.0f))
+	if ((Controller != nullptr) && (Value != 0.0f) && !IsCommunicating)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -125,7 +125,7 @@ void ALUTIACharacter::MoveForward(float Value)
 
 void ALUTIACharacter::MoveRight(float Value)
 {
-	if ( (Controller != nullptr) && (Value != 0.0f) )
+	if ( (Controller != nullptr) && (Value != 0.0f) && !IsCommunicating)
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();

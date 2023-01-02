@@ -76,6 +76,9 @@ public:
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "stats")
 	bool IsShiftPressed;
 
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "stats")
+		bool IsCommunicating = false;
+
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Camera | Zoom")
 		float MinZoomLength = 150.f;
 
