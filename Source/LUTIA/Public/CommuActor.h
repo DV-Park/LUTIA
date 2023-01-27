@@ -22,7 +22,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
-	UFUNCTION(BlueprintNativeEvent)
-		virtual void GetCommu();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Communicate")
+		void GetCommu();
+	virtual void GetCommu_Implementation();
 };

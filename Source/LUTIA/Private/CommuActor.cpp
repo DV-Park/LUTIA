@@ -25,3 +25,9 @@ void ACommuActor::Tick(float DeltaTime)
 
 }
 
+void ACommuActor::GetCommu_Implementation()
+{
+	printf("Test");
+}
+
+
