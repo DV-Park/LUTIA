@@ -6,6 +6,8 @@
 #include "Components/DirectionalLightComponent.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/SkyAtmosphereComponent.h"
+#include "Components/VolumetricCloudComponent.h"
+#include "Components/SkyLightComponent.h"
 
 
 // Sets default values
@@ -26,6 +28,19 @@ AA_SkySystem::AA_SkySystem()
 	SkyAtmosphereComp = CreateDefaultSubobject<USkyAtmosphereComponent>(TEXT("SkyAtmosphereComp"));
 	SkyAtmosphereComp->SetupAttachment(Root);
 
+	VcloudComp = CreateDefaultSubobject<UVolumetricCloudComponent>(TEXT("VcloudComp"));
+	VcloudComp->SetupAttachment(Root);
+
+	SkyLightComp = CreateDefaultSubobject<USkyLightComponent>(TEXT("SkyLightComp"));
+	SkyLightComp->SetupAttachment(Root);
+	SkyLightComp->bRealTimeCapture = true;
+
+}
+
+void AA_SkySystem::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	SetSunRot(TimeOfDay);
 }
 
 // Called when the game starts or when spawned
@@ -33,6 +48,11 @@ void AA_SkySystem::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void AA_SkySystem::SetSunRot(float InTime)
+{
+	Sun->SetRelativeRotation(FRotator(FMath::GetMappedRangeValueUnclamped(FVector2D(600,1800),FVector2D(180,360),InTime),0,0));
 }
 
 // Called every frame
