@@ -85,7 +85,7 @@ void AA_SkySystem::CreateVCMIDynamic()
 
 void AA_SkySystem::SetWeaterSettings(FGmWeatherSettings InWeatherSetts)
 {
-	SetVCSettings(InWeatherSetts.GMVCSettings);
+	SetVCSettings(InWeatherSetts.GmVCSettings);
 }
 
 void AA_SkySystem::SetVCSettings(FGmVolumetricSettings InVolumetricSettings)
@@ -94,9 +94,9 @@ void AA_SkySystem::SetVCSettings(FGmVolumetricSettings InVolumetricSettings)
 
 	if (VcloudComp && VCMIDynamic)
 	{
-		GMWeatherSettings.GMVCSettings = InVolumetricSettings;
+		GMWeatherSettings.GmVCSettings = InVolumetricSettings;
 
-		VCMIDynamic->SetScalarParameterValue("CloudDensity", GMWeatherSettings.GMVCSettings.CloudCoverage);
+		VCMIDynamic->SetScalarParameterValue("CloudDensity", GMWeatherSettings.GmVCSettings.CloudCoverage);
 	}
 }
 
