@@ -69,7 +69,8 @@ void AA_SkySystem::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 	SetSunRot(TimeOfDay);
 
-	UpdateSettings();
+	if(Weather)
+		UpdateSettings();
 }
 
 void AA_SkySystem::CreateVCMIDynamic()

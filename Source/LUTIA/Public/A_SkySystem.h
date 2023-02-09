@@ -54,11 +54,11 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default", meta = (UIMin = "0", UIMax = "2400"))
 	float TimeOfDay{ 610.0f };
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
-	TObjectPtr<UDA_Weather_Preset> Weather;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	FGmWeatherSettings GMWeatherSettings;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	TObjectPtr<UDA_Weather_Preset> Weather;
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="Volumetric Clouds")
 	UMaterialInterface* CurVCMaterial;
