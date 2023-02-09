@@ -8,11 +8,31 @@
 #include "Components/SkyAtmosphereComponent.h"
 #include "Components/VolumetricCloudComponent.h"
 #include "Components/SkyLightComponent.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
-AA_SkySystem::AA_SkySystem()
+AA_SkySystem::AA_SkySystem(const FObjectInitializer& ObjectInitializer)
+	:Super(ObjectInitializer)
 {
+
+	struct FConstructorStatics
+	{
+		ConstructorHelpers::FObjectFinder<UMaterialInterface> VCMaterials;
+
+		FConstructorStatics()
+			:VCMaterials(TEXT("MaterialInterface'/Game/Materials/M_VolumetricCloud_Inst'"))
+		{
+
+		}
+	};
+
+	static FConstructorStatics ConstructorStatics;
+
+	CurVCMaterial = ConstructorStatics.VCMaterials.Object;
+
+	bReplicates = true;
+
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -37,10 +57,54 @@ AA_SkySystem::AA_SkySystem()
 
 }
 
+void AA_SkySystem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AA_SkySystem, GMWeatherSettings);
+}
+
 void AA_SkySystem::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 	SetSunRot(TimeOfDay);
+
+	UpdateSettings();
+}
+
+void AA_SkySystem::CreateVCMIDynamic()
+{
+	if (CurVCMaterial)
+	{
+		if (!VCMIDynamic || (VCMIDynamic->Parent != CurVCMaterial))
+		{
+			VCMIDynamic = UMaterialInstanceDynamic::Create(CurVCMaterial, this);
+		}
+	}
+}
+
+void AA_SkySystem::SetWeaterSettings(FGmWeatherSettings InWeatherSetts)
+{
+	SetVCSettings(InWeatherSetts.GMVCSettings);
+}
+
+void AA_SkySystem::SetVCSettings(FGmVolumetricSettings InVolumetricSettings)
+{
+	VcloudComp->SetVisibility(true, false);
+
+	if (VcloudComp && VCMIDynamic)
+	{
+		GMWeatherSettings.GMVCSettings = InVolumetricSettings;
+
+		VCMIDynamic->SetScalarParameterValue("CloudDensity", GMWeatherSettings.GMVCSettings.CloudCoverage);
+	}
+}
+
+void AA_SkySystem::UpdateSettings()
+{
+	SetCompSettings();
+
+	SetWeaterSettings(Weather->GetWeatherSettings());
 }
 
 // Called when the game starts or when spawned
@@ -60,5 +124,15 @@ void AA_SkySystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AA_SkySystem::SetCompSettings()
+{
+	CreateVCMIDynamic();
+
+	if (VCMIDynamic) 
+	{
+		VcloudComp->SetMaterial(VCMIDynamic);
+	}
 }
 
