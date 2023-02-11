@@ -66,6 +66,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Dynamic Material Instance", meta = (MultiLine = "true"))
 	TObjectPtr<UMaterialInstanceDynamic> VCMIDynamic;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Wind", DisplayName = "Cloud01 Wind Offset")
+	FVector Cloud01WindOffset = FVector(0,0,0);
+
 	UFUNCTION()
 	void CreateVCMIDynamic();
 
@@ -76,7 +79,15 @@ public:
 	void SetVCSettings(FGmVolumetricSettings InVolumetricSettings);
 
 	UFUNCTION()
+	void SetWindSettings(FGmWindSettings InGmWindSettings);
+
+	UFUNCTION()
+	void SetVCWindOffset(float DeltaTime);
+
+	UFUNCTION()
 	void UpdateSettings();
+
+	
 
 protected:
 	// Called when the game starts or when spawned

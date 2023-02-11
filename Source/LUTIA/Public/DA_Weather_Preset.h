@@ -19,6 +19,9 @@ public:
 	double CloudCoverage{ 0 };
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Defaults",meta=(MultiLine="true",UIMin="0",UIMax="10"))
+	double CloudDetail{ 0.5 };
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Defaults",meta=(MultiLine="true",UIMin="0",UIMax="10"))
 	double Rain{ 0 };
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Defaults",meta=(MultiLine="true",UIMin="0",UIMax="10"))
@@ -36,6 +39,17 @@ public:
 };
 
 USTRUCT(BlueprintType)
+struct FGmWindSettings
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Wind", meta = (MultiLine = "true", UIMin = "0", UIMax = "10"))
+	float Cloud01WindOffset=1.0f;
+};
+
+USTRUCT(BlueprintType)
 struct FGmWeatherSettings 
 {
 	GENERATED_USTRUCT_BODY()
@@ -44,6 +58,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VolumetricCloud", meta = (ShowOnlyInnerProperties))
 	FGmVolumetricSettings GmVCSettings;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Wind", meta = (ShowOnlyInnerProperties))
+	FGmWindSettings GmWindSettings;
 
 };
 
@@ -56,6 +73,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Volumetric Cloud", meta = (ShowOnlyInnerProperties))
 	FGmVolumetricSettings GmVolumetricSettings;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Wind", meta = (ShowOnlyInnerProperties))
+	FGmWindSettings GmWindSettings;
 
 	UFUNCTION()
 	FGmWeatherSettings GetWeatherSettings();

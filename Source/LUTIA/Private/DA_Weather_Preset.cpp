@@ -8,6 +8,7 @@ FGmWeatherSettings UDA_Weather_Preset::GetWeatherSettings()
 	FGmWeatherSettings GmWS;
 
 	GmWS.GmVCSettings = GmVolumetricSettings;
+	GmWS.GmWindSettings = GmWindSettings;
 
 	return GmWS;
 }

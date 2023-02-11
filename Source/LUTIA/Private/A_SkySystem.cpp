@@ -31,8 +31,6 @@ AA_SkySystem::AA_SkySystem(const FObjectInitializer& ObjectInitializer)
 
 	CurVCMaterial = ConstructorStatics.VCMaterials.Object;
 
-	bReplicates = true;
-
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -87,6 +85,7 @@ void AA_SkySystem::CreateVCMIDynamic()
 void AA_SkySystem::SetWeaterSettings(FGmWeatherSettings InWeatherSetts)
 {
 	SetVCSettings(InWeatherSetts.GmVCSettings);
+	SetWindSettings(InWeatherSetts.GmWindSettings);
 }
 
 void AA_SkySystem::SetVCSettings(FGmVolumetricSettings InVolumetricSettings)
@@ -98,6 +97,29 @@ void AA_SkySystem::SetVCSettings(FGmVolumetricSettings InVolumetricSettings)
 		GMWeatherSettings.GmVCSettings = InVolumetricSettings;
 
 		VCMIDynamic->SetScalarParameterValue("CloudDensity", GMWeatherSettings.GmVCSettings.CloudCoverage);
+		VCMIDynamic->SetScalarParameterValue("CloudDetail", GMWeatherSettings.GmVCSettings.CloudDetail);
+	}
+}
+
+void AA_SkySystem::SetWindSettings(FGmWindSettings InGmWindSettings)
+{
+	if (VcloudComp && VCMIDynamic)
+	{
+		GMWeatherSettings.GmWindSettings = InGmWindSettings;
+	}
+}
+
+void AA_SkySystem::SetVCWindOffset(float DeltaTime)
+{
+	if (VcloudComp)
+	{
+		float CurWindOffset = DeltaTime * (GMWeatherSettings.GmWindSettings.Cloud01WindOffset / 100);
+		Cloud01WindOffset += FVector(CurWindOffset, CurWindOffset, 0);
+	}
+
+	if (VCMIDynamic)
+	{
+		VCMIDynamic->SetVectorParameterValue("Cloud01WindOffset", Cloud01WindOffset);
 	}
 }
 
@@ -124,6 +146,8 @@ void AA_SkySystem::SetSunRot(float InTime)
 void AA_SkySystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	SetVCWindOffset(DeltaTime);
 
 }
 
