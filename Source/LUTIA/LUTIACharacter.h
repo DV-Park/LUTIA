@@ -61,6 +61,8 @@ protected:
 
 	void CommuReleased();
 
+	void Jump();
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

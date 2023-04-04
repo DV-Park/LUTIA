@@ -58,7 +58,7 @@ void ALUTIACharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ALUTIACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ALUTIACharacter::ShiftPressed);
 	PlayerInputComponent->BindAction("Run", IE_Released, this, &ALUTIACharacter::ShiftReleased);
@@ -81,6 +81,16 @@ void ALUTIACharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	// handle touch devices
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &ALUTIACharacter::TouchStarted);
 	PlayerInputComponent->BindTouch(IE_Released, this, &ALUTIACharacter::TouchStopped);
+}
+
+void ALUTIACharacter::Jump()
+{
+	if (!IsCommunicating) 
+	{
+		bPressedJump = true;
+		JumpKeyHoldTime = 0.0f;
+	}
+	
 }
 
 void ALUTIACharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
