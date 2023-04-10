@@ -59,7 +59,7 @@ Build//
 !Source/LUTIA/*
 !Source/LUTIA.Tartget.cs
 !Source/LUTIAEditor.Target.cs
-
+Source/*
 
 # Don't ignore icon files in Build
 !Build/*/.ico
