@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Public/LUTIAGameState.h"
+#include "Public/LUTIA_PlayerState.h"
 #include "Public/LUTIA_SaveGame.h"
-#include "Kismet/GameplayStatics.h"
+
 #include "LUTIAGameMode.generated.h"
 
 
@@ -17,11 +19,10 @@ class ALUTIAGameMode : public AGameModeBase
 public:
 	ALUTIAGameMode();
 
-	UFUNCTION(BlueprintCallable, Category = "SaveData")
-	void Save();
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SaveData")
+		ULUTIA_SaveGame* SaveGame;
 
-	UFUNCTION(BlueprintCallable, Category = "SaveData")
-	void Load();
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 };
 
 

@@ -6,6 +6,7 @@
 #include "GameFramework/SaveGame.h"
 #include "LUTIA_SaveGame.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSaveGameSignature, class ULUTIA_SaveGame*, SaveObject);
 
 USTRUCT()
 struct FActorSaveData
@@ -72,14 +73,33 @@ public:
 	/* Actors stored from a level (currently does not support a specific level and just assumes the demo map) */
 	UPROPERTY()
 	TArray<FActorSaveData> SavedActors;
+
+	FPlayerSaveData* GetPlayerData(APlayerState* PlayerState);
+
+	void HandleStartingNewPlayer(AController* NewPlayer);
+
+	UFUNCTION(BlueprintCallable)
+		bool OverrideSpawnTransform(AController* NewPlayer);
+
+	UFUNCTION(BlueprintCallable, Category = "SaveGame")
+		void WriteSaveGame();
 	
-public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SaveData")
-		FString SaveSlotName;
+	void LoadSaveGame();
+
+	UPROPERTY(BlueprintAssignable)
+		FOnSaveGameSignature OnSaveGameLoaded;
+
+	UPROPERTY(BlueprintAssignable)
+		FOnSaveGameSignature OnSaveGameWritten;
+
+
+protected:
+	UPROPERTY()
+		TObjectPtr<ULUTIA_SaveGame> CurrentSaveGame;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SaveData")
-		int32 SaveIndex;
+		FString SaveSlotName = "UserData";
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SaveData")
-		int32 OpenSkillCount;
+		int32 SaveIndex = 0;
 };

@@ -2,6 +2,13 @@
 
 #include "LUTIAGameMode.h"
 #include "LUTIACharacter.h"
+#include "EngineUtils.h"
+#include "Public/LUTIA_PlayerState.h"
+#include "Public/LUTIA_SaveGame.h"
+#include "Public/SavableObjectInterface.h"
+#include "Public/LUTIAGameState.h"
+#include "Kismet/GameplayStatics.h"
+#include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "UObject/ConstructorHelpers.h"
 
 
@@ -15,35 +22,13 @@ ALUTIAGameMode::ALUTIAGameMode()
 	}
 }
 
-void ALUTIAGameMode::Save()
+void ALUTIAGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
-	ULUTIA_SaveGame* SaveGameInstance 
-		= Cast<ULUTIA_SaveGame>(UGameplayStatics::CreateSaveGameObject(ULUTIA_SaveGame::StaticClass()));
+	Super::InitGame(MapName, Options, ErrorMessage);
 
-	if (SaveGameInstance)
-	{
-		SaveGameInstance->SaveSlotName = "Save1";
-		SaveGameInstance->SaveIndex = 0;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("SaveGameInstance is nullptr"));
-	}
+	// (Save/Load logic moved into new SaveGameSubsystem)
+	SaveGame = Cast<ULUTIA_SaveGame>(UGameplayStatics::CreateSaveGameObject(ULUTIA_SaveGame::StaticClass()));
 
-	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->SaveIndex);
-}
-
-void ALUTIAGameMode::Load()
-{
-	ULUTIA_SaveGame* LoadGameInstance = Cast<ULUTIA_SaveGame>(UGameplayStatics::CreateSaveGameObject(ULUTIA_SaveGame::StaticClass()));
-
-	if (LoadGameInstance)
-	{
-		LoadGameInstance->SaveSlotName = "Save1";
-		LoadGameInstance->SaveIndex = 0;
-
-		LoadGameInstance = Cast<ULUTIA_SaveGame>(UGameplayStatics::LoadGameFromSlot(LoadGameInstance->SaveSlotName, LoadGameInstance->SaveIndex));
-
-		UE_LOG(LogTemp, Warning, TEXT("Load"));
-	}
+	// Optional slot name (Falls back to slot specified in SaveGameSettings class/INI otherwise)
+	SaveGame->LoadSaveGame();
 }
