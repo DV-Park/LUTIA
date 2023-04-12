@@ -19,10 +19,18 @@ class ALUTIAGameMode : public AGameModeBase
 public:
 	ALUTIAGameMode();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SaveData")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SaveData")
 		ULUTIA_SaveGame* SaveGame;
 
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+
+	UFUNCTION(BlueprintCallable)
+	void WriteSaveGame();
+
+	UFUNCTION(BlueprintCallable)
+	void LoadCharacterInfo();
+
+	
 };
 
 

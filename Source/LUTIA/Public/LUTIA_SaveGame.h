@@ -82,9 +82,9 @@ public:
 		bool OverrideSpawnTransform(AController* NewPlayer);
 
 	UFUNCTION(BlueprintCallable, Category = "SaveGame")
-		void WriteSaveGame();
+		void WriteSaveGame(UWorld* CurrentWorld);
 	
-	void LoadSaveGame();
+	void LoadSaveGame(UWorld* CurrentWorld);
 
 	UPROPERTY(BlueprintAssignable)
 		FOnSaveGameSignature OnSaveGameLoaded;

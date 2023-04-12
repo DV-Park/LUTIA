@@ -44,7 +44,7 @@ FPlayerSaveData* ULUTIA_SaveGame::GetPlayerData(APlayerState* PlayerState)
 void ULUTIA_SaveGame::HandleStartingNewPlayer(AController* NewPlayer)
 {
 	ALUTIA_PlayerState* PS = NewPlayer->GetPlayerState<ALUTIA_PlayerState>();
-	if (ensure(PS))
+	if (PS != nullptr)
 	{
 		PS->LoadPlayerState(this);
 		this->OverrideSpawnTransform(NewPlayer);
@@ -69,6 +69,7 @@ bool ULUTIA_SaveGame::OverrideSpawnTransform(AController* NewPlayer)
 		FPlayerSaveData* FoundData = this->GetPlayerData(PS);
 		if (FoundData && FoundData->bResumeAtTransform)
 		{
+			UE_LOG(LogTemp, Error, TEXT("Set Player Info"));
 			MyPawn->SetActorLocation(FoundData->Location);
 			MyPawn->SetActorRotation(FoundData->Rotation);
 
@@ -84,73 +85,70 @@ bool ULUTIA_SaveGame::OverrideSpawnTransform(AController* NewPlayer)
 	return false;
 }
 
-void ULUTIA_SaveGame::WriteSaveGame()
+void ULUTIA_SaveGame::WriteSaveGame(UWorld* CurrentWorld)
 {
+	UE_LOG(LogTemp, Error, TEXT("Created New SaveGame Data."));
+
 	this->SavedPlayers.Empty();
 	this->SavedActors.Empty();
 
-	if (GetWorld()->GetGameState()) {
-		AGameStateBase* GS = GetWorld()->GetGameState();
-		if (GS == nullptr)
-		{
-			// Warn about failure to save?
-			return;
-		}
-
-		// Iterate all player states, we don't have proper ID to match yet (requires Steam or EOS)
-		for (int32 i = 0; i < GS->PlayerArray.Num(); i++)
-		{
-			ALUTIA_PlayerState* PS = Cast<ALUTIA_PlayerState>(GS->PlayerArray[i]);
-			if (PS)
-			{
-				PS->SavePlayerState(this);
-				break; // single player only at this point
-			}
-		}
-
-		// Iterate the entire world of actors
-		for (FActorIterator It(GetWorld()); It; ++It)
-		{
-			AActor* Actor = *It;
-			// Only interested in our 'gameplay actors', skip actors that are being destroyed
-			// Note: You might instead use a dedicated SavableObject interface for Actors you want to save instead of re-using GameplayInterface
-			if (!IsValid(Actor) || !Actor->Implements<USavableObjectInterface>())
-			{
-				continue;
-			}
-
-			FActorSaveData ActorData;
-			ActorData.ActorName = Actor->GetFName();
-			ActorData.Transform = Actor->GetActorTransform();
-
-			// Pass the array to fill with data from Actor
-			FMemoryWriter MemWriter(ActorData.ByteData);
-
-			FObjectAndNameAsStringProxyArchive Ar(MemWriter, true);
-			// Find only variables with UPROPERTY(SaveGame)
-			Ar.ArIsSaveGame = true;
-			// Converts Actor's SaveGame UPROPERTIES into binary array
-			Actor->Serialize(Ar);
-
-			this->SavedActors.Add(ActorData);
-		}
-
-		UGameplayStatics::SaveGameToSlot(this, SaveSlotName, SaveIndex);
-
-		OnSaveGameWritten.Broadcast(this);
+	AGameStateBase* GS = CurrentWorld->GetGameState();
+	if (GS == nullptr)
+	{
+		// Warn about failure to save?
+		return;
 	}
+
+	// Iterate all player states, we don't have proper ID to match yet (requires Steam or EOS)
+	for (int32 i = 0; i < GS->PlayerArray.Num(); i++)
+	{
+		ALUTIA_PlayerState* PS = Cast<ALUTIA_PlayerState>(GS->PlayerArray[i]);
+		if (PS)
+		{
+			PS->SavePlayerState(this);
+			break; // single player only at this point
+		}
+	}
+
+	// Iterate the entire world of actors
+	for (FActorIterator It(CurrentWorld); It; ++It)
+	{
+		AActor* Actor = *It;
+		// Only interested in our 'gameplay actors', skip actors that are being destroyed
+		// Note: You might instead use a dedicated SavableObject interface for Actors you want to save instead of re-using GameplayInterface
+		if (!IsValid(Actor) || !Actor->Implements<USavableObjectInterface>())
+		{
+			continue;
+		}
+
+		FActorSaveData ActorData;
+		ActorData.ActorName = Actor->GetFName();
+		ActorData.Transform = Actor->GetActorTransform();
+
+		// Pass the array to fill with data from Actor
+		FMemoryWriter MemWriter(ActorData.ByteData);
+
+		FObjectAndNameAsStringProxyArchive Ar(MemWriter, true);
+		// Find only variables with UPROPERTY(SaveGame)
+		Ar.ArIsSaveGame = true;
+		// Converts Actor's SaveGame UPROPERTIES into binary array
+		Actor->Serialize(Ar);
+
+		this->SavedActors.Add(ActorData);
+	}
+	UGameplayStatics::SaveGameToSlot(this, SaveSlotName, SaveIndex);
+
+	OnSaveGameWritten.Broadcast(this);
 }
 
-void ULUTIA_SaveGame::LoadSaveGame()
+void ULUTIA_SaveGame::LoadSaveGame(UWorld* CurrentWorld)
 {
 	// Update slot name first if specified, otherwise keeps default name
 
 	if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, SaveIndex))
 	{
-		AController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		HandleStartingNewPlayer(PC);
 		// Iterate the entire world of actors
-		for (FActorIterator It(GetWorld()); It; ++It)
+		for (FActorIterator It(CurrentWorld); It; ++It)
 		{
 			AActor* Actor = *It;
 			// Only interested in our 'gameplay actors'
@@ -180,6 +178,7 @@ void ULUTIA_SaveGame::LoadSaveGame()
 		}
 
 		OnSaveGameLoaded.Broadcast(this);
+		UE_LOG(LogTemp, Error, TEXT("Load Successed"));
 	}
 	else
 	{
