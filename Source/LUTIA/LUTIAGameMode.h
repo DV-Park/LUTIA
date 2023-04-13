@@ -29,8 +29,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void LoadCharacterInfo();
-
-	
 };
 
 

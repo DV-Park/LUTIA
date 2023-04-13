@@ -34,7 +34,6 @@ void ALUTIAGameMode::InitGame(const FString& MapName, const FString& Options, FS
 	else
 		SaveGame = Cast<ULUTIA_SaveGame>(UGameplayStatics::CreateSaveGameObject(ULUTIA_SaveGame::StaticClass()));
 
-	
 }
 
 void ALUTIAGameMode::WriteSaveGame()

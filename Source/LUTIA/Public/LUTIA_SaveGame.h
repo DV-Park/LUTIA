@@ -39,7 +39,13 @@ public:
 		FString PlayerID;
 
 	UPROPERTY()
-		int32 Credits;
+		int32 AcquiredSkillCount;
+
+	UPROPERTY()
+		TArray<bool> AcquiredSkills;
+
+	UPROPERTY()
+		TArray<bool> CurrentUseSkills;
 
 	/* Longest survival time */
 	UPROPERTY()

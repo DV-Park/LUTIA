@@ -6,7 +6,16 @@
 #include "Net/UnrealNetwork.h"
 
 
-
+ALUTIA_PlayerState::ALUTIA_PlayerState()
+{
+	static ConstructorHelpers::FObjectFinder<UDataTable> SkillDataObj(TEXT("/Game/DataBase/SkillData"));
+	if (SkillDataObj.Succeeded())
+	{
+		SkillDataTable = SkillDataObj.Object;
+		AcquiredSkills.Init(0, SkillDataTable->GetRowNames().Num());
+		CurrentUseSkills.Init(0, SkillDataTable->GetRowNames().Num());
+	}
+}
 
 void ALUTIA_PlayerState::SavePlayerState_Implementation(ULUTIA_SaveGame* SaveObject)
 {
@@ -14,7 +23,16 @@ void ALUTIA_PlayerState::SavePlayerState_Implementation(ULUTIA_SaveGame* SaveObj
 	{
 		// Gather all relevant data for player
 		FPlayerSaveData SaveData;
+
 		SaveData.PersonalRecordTime = PersonalRecordTime;
+
+		SaveData.AcquiredSkillCount = AcquiredSkillCount;
+
+		SaveData.AcquiredSkills.Empty();
+		SaveData.AcquiredSkills.Append(AcquiredSkills);
+
+		SaveData.CurrentUseSkills.Empty();
+		SaveData.CurrentUseSkills.Append(CurrentUseSkills);
 		// Stored as FString for simplicity (original Steam ID is uint64)
 		SaveData.PlayerID = GetUniqueId().ToString();
 
@@ -39,6 +57,13 @@ void ALUTIA_PlayerState::LoadPlayerState_Implementation(ULUTIA_SaveGame* SaveObj
 		{
 			//Credits = SaveObject->Credits;
 			// Makes sure we trigger credits changed event
+			AcquiredSkillCount = FoundData->AcquiredSkillCount;
+
+			AcquiredSkills.Empty();
+			AcquiredSkills.Append(FoundData->AcquiredSkills);
+
+			CurrentUseSkills.Empty();
+			CurrentUseSkills.Append(FoundData->CurrentUseSkills);
 
 			PersonalRecordTime = FoundData->PersonalRecordTime;
 		}
@@ -48,3 +73,5 @@ void ALUTIA_PlayerState::LoadPlayerState_Implementation(ULUTIA_SaveGame* SaveObj
 		}
 	}
 }
+
+
