@@ -6,6 +6,7 @@
 #include "Net/UnrealNetwork.h"
 
 
+
 ALUTIA_PlayerState::ALUTIA_PlayerState()
 {
 	static ConstructorHelpers::FObjectFinder<UDataTable> SkillDataObj(TEXT("/Game/DataBase/SkillData"));
@@ -15,6 +16,13 @@ ALUTIA_PlayerState::ALUTIA_PlayerState()
 		AcquiredSkills.Init(0, SkillDataTable->GetRowNames().Num());
 		CurrentUseSkills.Init(0, SkillDataTable->GetRowNames().Num());
 	}
+	static ConstructorHelpers::FObjectFinder<UTexture2D> DefaultSkillImg(TEXT("/Game/UMG/UMG_Img/Skill/Default.Default"));
+	if (DefaultSkillImg.Succeeded())
+	{
+		FSkillPresetImg img;
+		img.Skill.Init(DefaultSkillImg.Object, 4);
+		SkillPreset.SkillImg.Init(img, 4);
+	}
 }
 
 void ALUTIA_PlayerState::SavePlayerState_Implementation(ULUTIA_SaveGame* SaveObject)
@@ -23,6 +31,7 @@ void ALUTIA_PlayerState::SavePlayerState_Implementation(ULUTIA_SaveGame* SaveObj
 	{
 		// Gather all relevant data for player
 		FPlayerSaveData SaveData;
+		FSkillPresetImgData ImgData;
 
 		SaveData.PersonalRecordTime = PersonalRecordTime;
 
@@ -30,6 +39,17 @@ void ALUTIA_PlayerState::SavePlayerState_Implementation(ULUTIA_SaveGame* SaveObj
 
 		SaveData.AcquiredSkills.Empty();
 		SaveData.AcquiredSkills.Append(AcquiredSkills);
+
+		SaveData.CurrentSkillPreset = CurrentSkillPreset;
+
+		SaveData.SkillPreset.SkillImg.Empty();
+
+		for (int i = 0; i < 4; i++) {
+			ImgData.Skill.Empty();
+			for (int j = 0; j < 4; j++)
+				ImgData.Skill.Emplace(SkillPreset.SkillImg[i].Skill[j]);
+			SaveData.SkillPreset.SkillImg.Emplace(ImgData);
+		}
 
 		SaveData.CurrentUseSkills.Empty();
 		SaveData.CurrentUseSkills.Append(CurrentUseSkills);
@@ -53,6 +73,7 @@ void ALUTIA_PlayerState::LoadPlayerState_Implementation(ULUTIA_SaveGame* SaveObj
 	if (SaveObject)
 	{
 		FPlayerSaveData* FoundData = SaveObject->GetPlayerData(this);
+		FSkillPresetImg ImgData;
 		if (FoundData)
 		{
 			//Credits = SaveObject->Credits;
@@ -64,6 +85,17 @@ void ALUTIA_PlayerState::LoadPlayerState_Implementation(ULUTIA_SaveGame* SaveObj
 
 			CurrentUseSkills.Empty();
 			CurrentUseSkills.Append(FoundData->CurrentUseSkills);
+
+			CurrentSkillPreset = FoundData->CurrentSkillPreset;
+
+			SkillPreset.SkillImg.Empty();
+
+			for (int i = 0; i < 4; i++) {
+				ImgData.Skill.Empty();
+				for (int j = 0; j < 4; j++)
+					ImgData.Skill.Emplace(FoundData->SkillPreset.SkillImg[i].Skill[j]);
+				SkillPreset.SkillImg.Emplace(ImgData);
+			}
 
 			PersonalRecordTime = FoundData->PersonalRecordTime;
 		}

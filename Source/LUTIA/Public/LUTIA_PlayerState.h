@@ -8,6 +8,25 @@
 #include "UObject/ConstructorHelpers.h"
 #include "LUTIA_PlayerState.generated.h"
 
+USTRUCT(BlueprintType)
+struct FSkillPresetImg
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Defaults", meta = (MultiLine = "true", UIMin = "0", UIMax = "10"))
+		TArray<UTexture2D*> Skill;
+};
+
+USTRUCT(BlueprintType)
+struct FSkillPreset
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Defaults", meta = (MultiLine = "true", UIMin = "0", UIMax = "10"))
+		TArray<FSkillPresetImg> SkillImg;
+};
 
 /**
  * 
@@ -22,6 +41,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 		int32 AcquiredSkillCount;
 
+	UPROPERTY(BlueprintReadWrite)
+		int32 CurrentSkillPreset;
+
 	UPROPERTY(BlueprintReadOnly)
 		float PersonalRecordTime;
 
@@ -31,8 +53,6 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 		class UDataTable* SkillDataTable;
 	
-
-
 public:
 	UFUNCTION(BlueprintNativeEvent)
 		void SavePlayerState(ULUTIA_SaveGame* SaveObject);
@@ -42,6 +62,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TArray<bool> CurrentUseSkills;
+
+	UPROPERTY(BlueprintReadWrite)
+		FSkillPreset SkillPreset;
 
 	ALUTIA_PlayerState();
 };

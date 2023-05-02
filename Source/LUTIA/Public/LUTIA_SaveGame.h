@@ -27,6 +27,26 @@ public:
 		TArray<uint8> ByteData;
 };
 
+USTRUCT(BlueprintType)
+struct FSkillPresetImgData
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Defaults", meta = (MultiLine = "true", UIMin = "0", UIMax = "10"))
+		TArray<UTexture2D*> Skill;
+};
+
+USTRUCT(BlueprintType)
+struct FSkillPresetData
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Defaults", meta = (MultiLine = "true", UIMin = "0", UIMax = "10"))
+		TArray<FSkillPresetImgData> SkillImg;
+};
+
 USTRUCT()
 struct FPlayerSaveData
 {
@@ -42,10 +62,16 @@ public:
 		int32 AcquiredSkillCount;
 
 	UPROPERTY()
+		int32 CurrentSkillPreset;
+
+	UPROPERTY()
 		TArray<bool> AcquiredSkills;
 
 	UPROPERTY()
 		TArray<bool> CurrentUseSkills;
+
+	UPROPERTY()
+		FSkillPresetData SkillPreset;
 
 	/* Longest survival time */
 	UPROPERTY()
