@@ -118,6 +118,8 @@ public:
 	
 	void LoadSaveGame(UWorld* CurrentWorld);
 
+	void LoadActorSave(AActor* CurrentActor);
+
 	UPROPERTY(BlueprintAssignable)
 		FOnSaveGameSignature OnSaveGameLoaded;
 

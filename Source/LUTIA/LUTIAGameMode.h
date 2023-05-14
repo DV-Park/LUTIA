@@ -29,6 +29,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void LoadCharacterInfo();
+
+	UFUNCTION(BlueprintCallable)
+	void LoadActorData(AActor* CurrentActor);
+
 };
 
 

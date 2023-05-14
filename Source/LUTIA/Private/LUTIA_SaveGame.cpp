@@ -152,15 +152,16 @@ void ULUTIA_SaveGame::LoadSaveGame(UWorld* CurrentWorld)
 		{
 			AActor* Actor = *It;
 			// Only interested in our 'gameplay actors'
-			if (!Actor->Implements<USavableObjectInterface>())
+			if (!(Actor->Implements<USavableObjectInterface>()))
 			{
 				continue;
 			}
-			
+
 			for (FActorSaveData ActorData : this->SavedActors)
 			{
 				if (ActorData.ActorName == Actor->GetFName())
 				{
+					UE_LOG(LogTemp, Error, TEXT("Actor Loaded : %s"), *Actor->GetFName().ToString());
 					Actor->SetActorTransform(ActorData.Transform);
 
 					FMemoryReader MemReader(ActorData.ByteData);
@@ -183,5 +184,34 @@ void ULUTIA_SaveGame::LoadSaveGame(UWorld* CurrentWorld)
 	else
 	{
 		UE_LOG(LogTemp, Log, TEXT("Created New SaveGame Data."));
+	}
+}
+
+void ULUTIA_SaveGame::LoadActorSave(AActor* CurrentActor)
+{
+	// Update slot name first if specified, otherwise keeps default name
+
+	if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, SaveIndex))
+	{
+		// Iterate the entire world of actors
+		for (FActorSaveData ActorData : this->SavedActors)
+		{
+			if (ActorData.ActorName == CurrentActor->GetFName())
+			{
+				UE_LOG(LogTemp, Error, TEXT("Actor Loaded : %s"), *CurrentActor->GetFName().ToString());
+				CurrentActor->SetActorTransform(ActorData.Transform);
+
+				FMemoryReader MemReader(ActorData.ByteData);
+
+				FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
+				Ar.ArIsSaveGame = true;
+				// Convert binary array back into actor's variables
+				CurrentActor->Serialize(Ar);
+
+				ISavableObjectInterface::Execute_OnActorLoaded(CurrentActor);
+
+				break;
+			}
+		}
 	}
 }

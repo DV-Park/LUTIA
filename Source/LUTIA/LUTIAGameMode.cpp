@@ -46,10 +46,16 @@ void ALUTIAGameMode::LoadCharacterInfo()
 	AController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (PC != nullptr) {
 		SaveGame->HandleStartingNewPlayer(PC);
+		SaveGame->LoadSaveGame(GetWorld());
 		UE_LOG(LogTemp, Error, TEXT("Character Load Successed"));
 	}
 	else
 		UE_LOG(LogTemp, Error, TEXT("Controller is nullptr"));
 
+}
+
+void ALUTIAGameMode::LoadActorData(AActor* CurrentActor)
+{
+	SaveGame->LoadActorSave(CurrentActor);
 }
 
