@@ -12,10 +12,8 @@
 
 
 // Sets default values
-AA_SkySystem::AA_SkySystem(const FObjectInitializer& ObjectInitializer)
-	:Super(ObjectInitializer)
+AA_SkySystem::AA_SkySystem()
 {
-
 	struct FConstructorStatics
 	{
 		ConstructorHelpers::FObjectFinder<UMaterialInterface> VCMaterials;
@@ -26,7 +24,6 @@ AA_SkySystem::AA_SkySystem(const FObjectInitializer& ObjectInitializer)
 
 		}
 	};
-
 	static FConstructorStatics ConstructorStatics;
 
 	CurVCMaterial = ConstructorStatics.VCMaterials.Object;
@@ -55,20 +52,13 @@ AA_SkySystem::AA_SkySystem(const FObjectInitializer& ObjectInitializer)
 
 }
 
-void AA_SkySystem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(AA_SkySystem, GMWeatherSettings);
-}
-
 void AA_SkySystem::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 	SetSunRot(TimeOfDay);
 
 	if(Weather)
-		UpdateSettings();
+		UpdateSettings(Weather);
 }
 
 void AA_SkySystem::CreateVCMIDynamic()
@@ -123,8 +113,9 @@ void AA_SkySystem::SetVCWindOffset(float DeltaTime)
 	}
 }
 
-void AA_SkySystem::UpdateSettings()
+void AA_SkySystem::UpdateSettings(UDA_Weather_Preset* w)
 {
+	Weather = w;
 	SetCompSettings();
 
 	SetWeaterSettings(Weather->GetWeatherSettings());

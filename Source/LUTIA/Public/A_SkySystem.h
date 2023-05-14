@@ -25,11 +25,8 @@ class LUTIA_API AA_SkySystem : public AActor
 	
 public:	
 	// Sets default values for this actor's properties
-	AA_SkySystem(const FObjectInitializer& ObjectInitializer);
+	AA_SkySystem();
 	
-
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override; //Replicated 사용 위해 필수!
-
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 
@@ -54,10 +51,10 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default", meta = (UIMin = "0", UIMax = "2400"))
 	float TimeOfDay{ 610.0f };
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGmWeatherSettings GMWeatherSettings;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default", BlueprintSetter = UpdateSettings)
 	TObjectPtr<UDA_Weather_Preset> Weather;
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="Volumetric Clouds")
@@ -84,8 +81,8 @@ public:
 	UFUNCTION()
 	void SetVCWindOffset(float DeltaTime);
 
-	UFUNCTION()
-	void UpdateSettings();
+	UFUNCTION(BlueprintSetter)
+	void UpdateSettings(UDA_Weather_Preset* w);
 
 	
 
