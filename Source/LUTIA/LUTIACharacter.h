@@ -4,10 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GameplayTagContainer.h"
+#include "AbilitySystemInterface.h"
+#include "LUTIA/LUTIA.h"
 #include "LUTIACharacter.generated.h"
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterDiedDelegate, ALUTIACharacter*, Character);
+
 UCLASS(config=Game)
-class ALUTIACharacter : public ACharacter
+class ALUTIACharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -19,13 +25,88 @@ class ALUTIACharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 public:
-	ALUTIACharacter();
+	ALUTIACharacter(const class FObjectInitializer& ObjectInitializer);
 
+	UPROPERTY(BlueprintAssignable, Category = "LUTIA|Character")
+	FCharacterDiedDelegate OnCharacterDied;
+
+	UFUNCTION(BlueprintCallable, Category = "LUTIA|Character")
+	virtual bool IsAlive() const;
+
+	UFUNCTION(BlueprintCallable, Category = "LUTIA|Character")
+	virtual int32 GetAbilityLevel(LUTIAAbilityID AbilityID) const;
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "stats")
+	bool IsShiftPressed;
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "stats")
+	bool IsCommunicating = false;
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Camera | Zoom")
+	float MinZoomLength = 150.f;
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Camera | Zoom")
+	float MaxZoomLength = 410.f;
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Camera | Zoom")
+	float DefaultArmLength = 400.f;
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Camera | Zoom")
+	float ZoomStep = 10.f;
+
+	virtual void RemoveCharacterAbilities();
+
+	virtual void Die();
+
+	UFUNCTION(BlueprintCallable, Category = "LUTIA|Character")
+	virtual void FinishDying();
+
+	UFUNCTION(BlueprintCallable, Category = "LUTIA|Character|Attributes")
+	float GetCharacterLevel() const;
+
+	UFUNCTION(BlueprintCallable, Category = "LUTIA|Character|Attributes")
+	float GetHealth() const;
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	/** Returns CameraBoom subobject **/
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	/** Returns FollowCamera subobject **/
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;
 
 protected:
+
+	TWeakObjectPtr<class UCharacterAbilitySystemComponent> AbilitySystemComponent;
+	TWeakObjectPtr<class UCharacterAttributeSetBase> AttributeSetBase;
+
+	FGameplayTag DeadTag;
+	FGameplayTag EffectRemoveOnDeathTag;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "LUTIA|Character")
+	FText CharacterName;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "LUTIA|Animation")
+	UAnimMontage* DeathMontage;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "LUTIA|Abilities")
+	TArray<TSubclassOf<class UCharacterGameplayAbility>> CharacterAbilities;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "LUTIA|Abilities")
+	TSubclassOf<class UGameplayEffect> DefaultAttributes;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "LUTIA|Abilities")
+	TArray<TSubclassOf<class UGameplayEffect>> StartupEffects;
+
+	virtual void AddCharacterAbilities();
+	
+	virtual void InitializeAttributes();
+
+	virtual void AddStartupEffects();
+
+	virtual void SetHealth(float Health);
 
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
@@ -67,30 +148,5 @@ protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
-
-public:
-	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
-public:
-	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "stats")
-	bool IsShiftPressed;
-
-	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "stats")
-		bool IsCommunicating = false;
-
-	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Camera | Zoom")
-		float MinZoomLength = 150.f;
-
-	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Camera | Zoom")
-		float MaxZoomLength = 410.f;
-
-	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Camera | Zoom")
-		float DefaultArmLength = 400.f;
-
-	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Camera | Zoom")
-		float ZoomStep = 10.f;
 };
 

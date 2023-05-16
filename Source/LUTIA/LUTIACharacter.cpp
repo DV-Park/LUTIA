@@ -7,12 +7,22 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Public/CharacterAbilitySystemComponent.h"
+#include "Public/CharacterAttributeSetBase.h"
+#include "Public/CharacterGameplayAbility.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ALUTIACharacter
 
-ALUTIACharacter::ALUTIACharacter()
+ALUTIACharacter::ALUTIACharacter(const class FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
+
+	bAlwaysRelevant = true;
+
+	DeadTag = FGameplayTag::RequestGameplayTag(FName("State.Dead"));
+	EffectRemoveOnDeathTag = FGameplayTag::RequestGameplayTag(FName("State.RemoveOnDeath"));
+
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -49,6 +59,16 @@ ALUTIACharacter::ALUTIACharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+}
+
+bool ALUTIACharacter::IsAlive() const
+{
+	return GetHealth() > 0.0f;
+}
+
+int32 ALUTIACharacter::GetAbilityLevel(LUTIAAbilityID AbilityID) const
+{
+	return 1;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -180,4 +200,152 @@ void ALUTIACharacter::CommuPressed()
 
 void ALUTIACharacter::CommuReleased()
 {
+}
+
+void ALUTIACharacter::AddCharacterAbilities()
+{
+	if (GetLocalRole() != ROLE_Authority || !AbilitySystemComponent.IsValid() || AbilitySystemComponent->CharacterAbilitiesGiven)
+	{
+		return;
+	}
+	for (TSubclassOf<UCharacterGameplayAbility>& StartupAbility : CharacterAbilities) {
+		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(StartupAbility, GetAbilityLevel(StartupAbility.GetDefaultObject()->AbilityID), static_cast<int32>(StartupAbility.GetDefaultObject()->AbilityInputID), this));
+	}
+
+	AbilitySystemComponent->CharacterAbilitiesGiven = true;
+}
+
+void ALUTIACharacter::InitializeAttributes()
+{
+	if (!AbilitySystemComponent.IsValid())
+	{
+		return;
+	}
+
+	if (!DefaultAttributes)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s() Missing DefaultAttributes for %s. plear fill in the Character's Blueprint."), *FString(__FUNCTION__), *GetName());
+		return;
+	}
+
+	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+	EffectContext.AddSourceObject(this);
+
+	FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(DefaultAttributes, GetCharacterLevel(), EffectContext);
+
+	if (NewHandle.IsValid()) 
+	{
+		FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), AbilitySystemComponent.Get());
+	}
+}
+
+void ALUTIACharacter::AddStartupEffects()
+{
+	if (GetLocalRole() != ROLE_Authority || !AbilitySystemComponent.IsValid() || AbilitySystemComponent->StartupEffectsApplied)
+	{
+		return;
+	}
+
+	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+	EffectContext.AddSourceObject(this);
+
+	for (TSubclassOf<UGameplayEffect> GameplayEffect : StartupEffects)
+	{
+		FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(GameplayEffect, GetCharacterLevel(), EffectContext);
+
+		if (NewHandle.IsValid())
+		{
+			FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), AbilitySystemComponent.Get());
+		}
+	}
+
+	AbilitySystemComponent->StartupEffectsApplied = true;
+}
+
+void ALUTIACharacter::SetHealth(float Health)
+{
+	if (AttributeSetBase.IsValid()) {
+		AttributeSetBase->SetHealth(Health);
+	}
+}
+
+void ALUTIACharacter::RemoveCharacterAbilities()
+{
+	if(GetLocalRole()!=ROLE_Authority || !AbilitySystemComponent.IsValid() || !AbilitySystemComponent->CharacterAbilitiesGiven)
+	{
+		return;
+	}
+	TArray<FGameplayAbilitySpecHandle> AbilitiesToRemove;
+	for(const FGameplayAbilitySpec& Spec : AbilitySystemComponent->GetActivatableAbilities())
+	{
+		if ((Spec.SourceObject == this) && CharacterAbilities.Contains(Spec.Ability->GetClass()))
+		{
+			AbilitiesToRemove.Add(Spec.Handle);
+		}
+	}
+
+	for (int32 i = 0; i < AbilitiesToRemove.Num(); i++) 
+	{
+		AbilitySystemComponent->ClearAbility(AbilitiesToRemove[i]);
+	}
+
+	AbilitySystemComponent->CharacterAbilitiesGiven = false;
+}
+
+void ALUTIACharacter::Die()
+{
+	RemoveCharacterAbilities();
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCharacterMovement()->GravityScale = 0;
+	GetCharacterMovement()->Velocity = FVector(0);
+
+	OnCharacterDied.Broadcast(this);
+
+	if (AbilitySystemComponent.IsValid()) 
+	{
+		AbilitySystemComponent->CancelAbilities();
+
+		FGameplayTagContainer EffectsTagsToRemove;
+		EffectsTagsToRemove.AddTag(EffectRemoveOnDeathTag);
+		int32 NumEffectsEremoved = AbilitySystemComponent->RemoveActiveEffectsWithTags(EffectsTagsToRemove);
+		AbilitySystemComponent->AddLooseGameplayTag(DeadTag);
+	}
+	if (DeathMontage)
+	{
+		PlayAnimMontage(DeathMontage);
+	}
+	else 
+	{
+		FinishDying();
+	}
+
+}
+
+void ALUTIACharacter::FinishDying()
+{
+	Destroy();
+}
+
+float ALUTIACharacter::GetCharacterLevel() const
+{
+	if (AttributeSetBase.IsValid())
+	{
+		return AttributeSetBase->GetLevel();
+	}
+	return 0.0f;
+}
+
+float ALUTIACharacter::GetHealth() const
+{
+	if (AttributeSetBase.IsValid())
+	{
+		return AttributeSetBase->GetHealth();
+	}
+	return 0.0f;
+}
+
+UAbilitySystemComponent* ALUTIACharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent.Get();
 }
