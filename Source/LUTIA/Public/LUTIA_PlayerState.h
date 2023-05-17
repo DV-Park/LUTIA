@@ -6,7 +6,12 @@
 #include "GameFramework/PlayerState.h"
 #include "CustomDataTableStruct.h"
 #include "UObject/ConstructorHelpers.h"
+#include "AbilitySystemInterface.h"
+#include "CharacterAttributeSetBase.h"
+#include "CharacterAbilitySystemComponent.h"
+#include "GameplayEffectTypes.h"
 #include "LUTIA_PlayerState.generated.h"
+
 
 USTRUCT(BlueprintType)
 struct FSkillPresetImg
@@ -34,7 +39,7 @@ public:
 class ULUTIA_SaveGame;
 
 UCLASS()
-class LUTIA_API ALUTIA_PlayerState : public APlayerState
+class LUTIA_API ALUTIA_PlayerState : public APlayerState, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 protected:
@@ -52,19 +57,53 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite)
 		class UDataTable* SkillDataTable;
+
+	UPROPERTY()
+	class UCharacterAbilitySystemComponent* AbilitySystemComponent;
+
+	UPROPERTY()
+	class UCharacterAttributeSetBase* AttributeSetBase;
+
+	FGameplayTag DeadTag;
+
+	FDelegateHandle HealthChangedDelegateHandle;
+
+	virtual void BeginPlay() override;
+
+	virtual void HealthChanged(const FOnAttributeChangeData& Data);
+
+	virtual void LevelChanged(const FOnAttributeChangeData& Data);
+
+	virtual void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 	
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<bool> CurrentUseSkills;
+
+	UPROPERTY(BlueprintReadWrite)
+		FSkillPreset SkillPreset;
+
 	UFUNCTION(BlueprintNativeEvent)
 		void SavePlayerState(ULUTIA_SaveGame* SaveObject);
 
 	UFUNCTION(BlueprintNativeEvent)
 		void LoadPlayerState(ULUTIA_SaveGame* SaveObject);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		TArray<bool> CurrentUseSkills;
+	class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-	UPROPERTY(BlueprintReadWrite)
-		FSkillPreset SkillPreset;
+	class UCharacterAttributeSetBase* GetAttributeSetBase() const;
+
+	UFUNCTION(BlueprintCallable, Category = "LUTIA|LUTIAPlayerState")
+	bool IsAlive() const;
+
+	UFUNCTION(BlueprintCallable, Category= "LUTIA|LUTIAPlayerState")
+	void ShowAbilityConfirmCancelText(bool ShowText);
+
+	UFUNCTION(BlueprintCallable, Category="LUTIA|LUTIAPlayerState")
+	float GetHealth() const;
+
+	UFUNCTION(BlueprintCallable, Category = "LUTIA|LUTIAPlayerState")
+	int32 GetCharacterLevel() const;
 
 	ALUTIA_PlayerState();
 };

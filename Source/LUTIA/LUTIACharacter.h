@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "AbilitySystemInterface.h"
 #include "LUTIA/LUTIA.h"
+#include "Public/LUTIA_PlayerState.h"
 #include "LUTIACharacter.generated.h"
 
 
@@ -24,17 +25,12 @@ class ALUTIACharacter : public ACharacter, public IAbilitySystemInterface
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
 public:
 	ALUTIACharacter(const class FObjectInitializer& ObjectInitializer);
 
 	UPROPERTY(BlueprintAssignable, Category = "LUTIA|Character")
 	FCharacterDiedDelegate OnCharacterDied;
-
-	UFUNCTION(BlueprintCallable, Category = "LUTIA|Character")
-	virtual bool IsAlive() const;
-
-	UFUNCTION(BlueprintCallable, Category = "LUTIA|Character")
-	virtual int32 GetAbilityLevel(LUTIAAbilityID AbilityID) const;
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "stats")
 	bool IsShiftPressed;
@@ -54,9 +50,19 @@ public:
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Camera | Zoom")
 	float ZoomStep = 10.f;
 
+	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input)
+	float TurnRateGamepad;
+
 	virtual void RemoveCharacterAbilities();
 
 	virtual void Die();
+
+	UFUNCTION(BlueprintCallable, Category = "LUTIA|Character")
+	virtual bool IsAlive() const;
+
+	UFUNCTION(BlueprintCallable, Category = "LUTIA|Character")
+	virtual int32 GetAbilityLevel(LUTIAAbilityID AbilityID) const;
 
 	UFUNCTION(BlueprintCallable, Category = "LUTIA|Character")
 	virtual void FinishDying();
@@ -73,9 +79,15 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
-	float TurnRateGamepad;
+
+	virtual void PossessedBy(AController* NewController) override;
+
+	UFUNCTION(BlueprintCallable, Category = "LUTIA|Camera")
+	float GetStartingCameraBoomArmLength();
+
+	UFUNCTION(BlueprintCallable, Category = "LUTIA|Camera")
+	FVector GetStartingCameraBoomLocation();
+	
 
 protected:
 
@@ -144,9 +156,24 @@ protected:
 
 	void Jump();
 
-protected:
+	bool ASCInputBound = false;
+
+	virtual void BeginPlay() override;
+
+	virtual void OnRep_PlayerState() override;
+
+	void InitializeStartingValues(ALUTIA_PlayerState* PS);
+
+	void BindASCInput();
+
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "LUTIA|Camera")
+	float StartingCameraBoomArmLength;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "LUTIA|Camera")
+	FVector StartingCameraBoomLocation;
 };
 

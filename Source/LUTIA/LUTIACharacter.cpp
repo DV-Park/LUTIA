@@ -10,6 +10,9 @@
 #include "Public/CharacterAbilitySystemComponent.h"
 #include "Public/CharacterAttributeSetBase.h"
 #include "Public/CharacterGameplayAbility.h"
+#include "Public/LUTIA_PlayerState.h"
+#include "Public/LUTIA_PlayerController.h"
+#include "Public/CharacterAbilitySystemComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ALUTIACharacter
@@ -101,6 +104,8 @@ void ALUTIACharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	// handle touch devices
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &ALUTIACharacter::TouchStarted);
 	PlayerInputComponent->BindTouch(IE_Released, this, &ALUTIACharacter::TouchStopped);
+
+	BindASCInput();
 }
 
 void ALUTIACharacter::Jump()
@@ -111,6 +116,52 @@ void ALUTIACharacter::Jump()
 		JumpKeyHoldTime = 0.0f;
 	}
 	
+}
+
+void ALUTIACharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	StartingCameraBoomArmLength = CameraBoom->TargetArmLength;
+	StartingCameraBoomLocation = CameraBoom->GetRelativeLocation();
+}
+
+void ALUTIACharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	ALUTIA_PlayerState* PS = GetPlayerState<ALUTIA_PlayerState>();
+	if (PS)
+	{
+		InitializeStartingValues(PS);
+		BindASCInput();
+	}
+}
+
+void ALUTIACharacter::InitializeStartingValues(ALUTIA_PlayerState* PS)
+{
+	if (PS)
+	{
+		AbilitySystemComponent = Cast<UCharacterAbilitySystemComponent>(PS->GetAbilitySystemComponent());
+
+		PS->GetAbilitySystemComponent()->InitAbilityActorInfo(PS, this);
+
+		AttributeSetBase = PS->GetAttributeSetBase();
+
+		AbilitySystemComponent->SetTagMapCount(DeadTag, 0);
+
+		InitializeAttributes();
+	}
+}
+
+void ALUTIACharacter::BindASCInput()
+{
+	if (!ASCInputBound && AbilitySystemComponent.IsValid() && IsValid(InputComponent))
+	{
+		AbilitySystemComponent->BindAbilityActivationToInputComponent(InputComponent, FGameplayAbilityInputBinds(FString("ConfirmTarget"), FString("CancelTarget"), FString("LUTIAAbilityID"), static_cast<int32>(LUTIAAbilityID::Confirm), static_cast<int32>(LUTIAAbilityID::Cancel)));
+
+		ASCInputBound = true;
+	}
 }
 
 void ALUTIACharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
@@ -348,4 +399,27 @@ float ALUTIACharacter::GetHealth() const
 UAbilitySystemComponent* ALUTIACharacter::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent.Get();
+}
+
+void ALUTIACharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	ALUTIA_PlayerState* PS = GetPlayerState<ALUTIA_PlayerState>();
+	if (PS)
+	{
+		InitializeStartingValues(PS);
+		AddStartupEffects();
+		AddCharacterAbilities();
+	}
+}
+
+float ALUTIACharacter::GetStartingCameraBoomArmLength()
+{
+	return StartingCameraBoomArmLength;
+}
+
+FVector ALUTIACharacter::GetStartingCameraBoomLocation()
+{
+	return StartingCameraBoomLocation;
 }

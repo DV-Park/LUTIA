@@ -4,8 +4,14 @@
 #include "LUTIA_PlayerState.h"
 #include "LUTIA_SaveGame.h"
 #include "Net/UnrealNetwork.h"
+#include "CharacterAttributeSetBase.h"
 
 
+
+int32 ALUTIA_PlayerState::GetCharacterLevel() const
+{
+	return AttributeSetBase->GetLevel();
+}
 
 ALUTIA_PlayerState::ALUTIA_PlayerState()
 {
@@ -23,6 +29,17 @@ ALUTIA_PlayerState::ALUTIA_PlayerState()
 		img.Skill.Init(DefaultSkillImg.Object, 4);
 		SkillPreset.SkillImg.Init(img, 4);
 	}
+
+	AbilitySystemComponent = CreateDefaultSubobject<UCharacterAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent->SetIsReplicated(true);
+
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
+
+	AttributeSetBase = CreateDefaultSubobject<UCharacterAttributeSetBase>(TEXT("AttributeSetBase"));
+
+	NetUpdateFrequency = 100.0f;
+
+	DeadTag = FGameplayTag::RequestGameplayTag(FName("State.Dead"));
 }
 
 void ALUTIA_PlayerState::SavePlayerState_Implementation(ULUTIA_SaveGame* SaveObject)
@@ -106,4 +123,64 @@ void ALUTIA_PlayerState::LoadPlayerState_Implementation(ULUTIA_SaveGame* SaveObj
 	}
 }
 
+void ALUTIA_PlayerState::BeginPlay()
+{
+	Super::BeginPlay();
 
+	if (AbilitySystemComponent)
+	{
+		HealthChangedDelegateHandle = AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSetBase->GetHealthAttribute()).AddUObject(this, &ALUTIA_PlayerState::HealthChanged);
+
+		AbilitySystemComponent->RegisterGameplayTagEvent(FGameplayTag::RequestGameplayTag(FName("State.Debuff.Stun")), EGameplayTagEventType::NewOrRemoved).AddUObject(this, &ALUTIA_PlayerState::StunTagChanged);
+	}
+
+}
+
+void ALUTIA_PlayerState::HealthChanged(const FOnAttributeChangeData& Data)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Health Changed!"));
+}
+
+void ALUTIA_PlayerState::LevelChanged(const FOnAttributeChangeData& Data)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Level Changed!"));
+}
+
+void ALUTIA_PlayerState::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	if (NewCount > 0)
+	{
+		FGameplayTagContainer AbilityTagsToCancel;
+		AbilityTagsToCancel.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability")));
+
+		FGameplayTagContainer AbilityTagsToIgnore;
+		AbilityTagsToIgnore.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.NotCanceledByStun")));
+
+		AbilitySystemComponent->CancelAbilities(&AbilityTagsToCancel, &AbilityTagsToIgnore);
+	}
+}
+
+UAbilitySystemComponent* ALUTIA_PlayerState::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
+UCharacterAttributeSetBase* ALUTIA_PlayerState::GetAttributeSetBase() const
+{
+	return AttributeSetBase;
+}
+
+bool ALUTIA_PlayerState::IsAlive() const
+{
+	return GetHealth() > 0.0f;
+}
+
+void ALUTIA_PlayerState::ShowAbilityConfirmCancelText(bool ShowText)
+{
+	//TODO -- Implement HUD Later
+}
+
+float ALUTIA_PlayerState::GetHealth() const
+{
+	return AttributeSetBase->GetHealth();
+}

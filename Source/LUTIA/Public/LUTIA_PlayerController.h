@@ -14,4 +14,6 @@ class LUTIA_API ALUTIA_PlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+protected:
+	virtual void OnPossess(APawn* InPawn) override;
 };
