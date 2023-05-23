@@ -44,19 +44,25 @@ class LUTIA_API ALUTIA_PlayerState : public APlayerState, public IAbilitySystemI
 	GENERATED_BODY()
 protected:
 	UPROPERTY(BlueprintReadWrite)
-		int32 AcquiredSkillCount;
+	int32 AcquiredSkillCount;
 
 	UPROPERTY(BlueprintReadWrite)
-		int32 CurrentSkillPreset;
+	int32 CurrentSkillPreset;
 
 	UPROPERTY(BlueprintReadOnly)
-		float PersonalRecordTime;
+	float PersonalRecordTime;
 
 	UPROPERTY(BlueprintReadWrite)
-		TArray<bool> AcquiredSkills;
+	TArray<bool> AcquiredSkills;
 
 	UPROPERTY(BlueprintReadWrite)
-		class UDataTable* SkillDataTable;
+	class UDataTable* SkillDataTable;
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 MainQuestIndex;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool IsMainQuestClear = true;
 
 	UPROPERTY()
 	class UCharacterAbilitySystemComponent* AbilitySystemComponent;

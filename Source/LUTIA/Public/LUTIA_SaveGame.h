@@ -73,6 +73,12 @@ public:
 	UPROPERTY()
 		FSkillPresetData SkillPreset;
 
+	UPROPERTY()
+		int32 MainQuestIndex;
+
+	UPROPERTY()
+		bool IsMainQuestClear;
+
 	/* Longest survival time */
 	UPROPERTY()
 		float PersonalRecordTime;

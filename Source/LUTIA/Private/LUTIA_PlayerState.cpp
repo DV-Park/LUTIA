@@ -61,6 +61,10 @@ void ALUTIA_PlayerState::SavePlayerState_Implementation(ULUTIA_SaveGame* SaveObj
 
 		SaveData.SkillPreset.SkillImg.Empty();
 
+		SaveData.MainQuestIndex = MainQuestIndex;
+
+		SaveData.IsMainQuestClear = IsMainQuestClear;
+
 		for (int i = 0; i < 4; i++) {
 			ImgData.Skill.Empty();
 			for (int j = 0; j < 4; j++)
@@ -96,6 +100,9 @@ void ALUTIA_PlayerState::LoadPlayerState_Implementation(ULUTIA_SaveGame* SaveObj
 			//Credits = SaveObject->Credits;
 			// Makes sure we trigger credits changed event
 			AcquiredSkillCount = FoundData->AcquiredSkillCount;
+
+			MainQuestIndex = FoundData->MainQuestIndex;
+			IsMainQuestClear = FoundData->IsMainQuestClear;
 
 			AcquiredSkills.Empty();
 			AcquiredSkills.Append(FoundData->AcquiredSkills);
