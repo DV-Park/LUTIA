@@ -95,6 +95,9 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 		void LoadPlayerState(ULUTIA_SaveGame* SaveObject);
 
+	UFUNCTION(BlueprintCallable)
+		void MainQuestClear(int32 Index);
+
 	class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	class UCharacterAttributeSetBase* GetAttributeSetBase() const;
