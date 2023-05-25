@@ -3,27 +3,7 @@
 
 #include "CommuActor.h"
 
-// Sets default values
-ACommuActor::ACommuActor()
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
 
-}
-
-// Called when the game starts or when spawned
-void ACommuActor::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void ACommuActor::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
 
 void ACommuActor::GetCommu_Implementation()
 {
