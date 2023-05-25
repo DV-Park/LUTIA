@@ -12,7 +12,7 @@ class LUTIA_API ACommuActor : public AActor
 	GENERATED_BODY()
 	
 public:	
-	UFUNCTION(BlueprintNativeEvent, Category = "Communicate")
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Communicate")
 		void GetCommu();
 	virtual void GetCommu_Implementation();
 

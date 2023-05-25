@@ -167,6 +167,15 @@ void ALUTIA_PlayerState::StunTagChanged(const FGameplayTag CallbackTag, int32 Ne
 	}
 }
 
+void ALUTIA_PlayerState::MainQuestClear(int32 Index)
+{
+	if (Index == MainQuestIndex)
+	{
+		IsMainQuestClear = true;
+		MainQuestIndex++;
+	}
+}
+
 UAbilitySystemComponent* ALUTIA_PlayerState::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
