@@ -38,6 +38,9 @@ public:
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "stats")
 	bool IsCommunicating = false;
 
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "stats")
+	bool InputController = false;
+
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Camera | Zoom")
 	float MinZoomLength = 150.f;
 
@@ -131,6 +134,8 @@ protected:
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
 	 */
 	void TurnAtRate(float Rate);
+	virtual void AddControllerPitchInput(float Val) override;
+	virtual void AddControllerYawInput(float Val) override;
 
 	/**
 	 * Called via input to turn look up/down at a given rate. 

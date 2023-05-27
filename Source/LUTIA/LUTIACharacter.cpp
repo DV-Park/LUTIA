@@ -95,22 +95,22 @@ void ALUTIACharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
-	PlayerInputComponent->BindAxis("Turn Right / Left Mouse", this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("Turn Right / Left Mouse", this, &ALUTIACharacter::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("Turn Right / Left Gamepad", this, &ALUTIACharacter::TurnAtRate);
-	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &APawn::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &ALUTIACharacter::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("Look Up / Down Gamepad", this, &ALUTIACharacter::LookUpAtRate);
 	PlayerInputComponent->BindAxis("Camera Zoom In / Out", this, &ALUTIACharacter::CameraZoom);
 
 	// handle touch devices
-	PlayerInputComponent->BindTouch(IE_Pressed, this, &ALUTIACharacter::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &ALUTIACharacter::TouchStopped);
+	//PlayerInputComponent->BindTouch(IE_Pressed, this, &ALUTIACharacter::TouchStarted);
+	//PlayerInputComponent->BindTouch(IE_Released, this, &ALUTIACharacter::TouchStopped);
 
 	BindASCInput();
 }
 
 void ALUTIACharacter::Jump()
 {
-	if (!IsCommunicating) 
+	if (!IsCommunicating && !InputController)
 	{
 		bPressedJump = true;
 		JumpKeyHoldTime = 0.0f;
@@ -177,18 +177,32 @@ void ALUTIACharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Locati
 void ALUTIACharacter::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
+	if(!InputController)
+		AddControllerYawInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
+}
+
+void ALUTIACharacter::AddControllerPitchInput(float Val)
+{
+	if(!InputController)
+		Super::AddControllerPitchInput(Val);
+}
+
+void ALUTIACharacter::AddControllerYawInput(float Val)
+{
+	if (!InputController)
+		Super::AddControllerYawInput(Val);
 }
 
 void ALUTIACharacter::LookUpAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
+	if (!InputController)
+		AddControllerPitchInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
 }
 
 void ALUTIACharacter::MoveForward(float Value)
 {
-	if ((Controller != nullptr) && (Value != 0.0f) && !IsCommunicating)
+	if ((Controller != nullptr) && (Value != 0.0f) && !IsCommunicating && !InputController)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -206,7 +220,7 @@ void ALUTIACharacter::MoveForward(float Value)
 
 void ALUTIACharacter::MoveRight(float Value)
 {
-	if ( (Controller != nullptr) && (Value != 0.0f) && !IsCommunicating)
+	if ( (Controller != nullptr) && (Value != 0.0f) && !IsCommunicating && !InputController)
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -226,11 +240,13 @@ void ALUTIACharacter::MoveRight(float Value)
 void ALUTIACharacter::CameraZoom(float Value)
 {
 	float armLength = CameraBoom->TargetArmLength;
-
-	if (armLength < MaxZoomLength && Value < 0)
-		CameraBoom->TargetArmLength -= Value * ZoomStep;
-	else if (armLength > MinZoomLength && Value > 0)
-		CameraBoom->TargetArmLength -= Value * ZoomStep;
+	if (!InputController)
+	{
+		if (armLength < MaxZoomLength && Value < 0)
+			CameraBoom->TargetArmLength -= Value * ZoomStep;
+		else if (armLength > MinZoomLength && Value > 0)
+			CameraBoom->TargetArmLength -= Value * ZoomStep;
+	}
 }
 
 void ALUTIACharacter::ShiftPressed()
