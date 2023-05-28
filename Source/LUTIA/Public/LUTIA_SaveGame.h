@@ -34,6 +34,8 @@ struct FSkillPresetImgData
 
 public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Defaults", meta = (MultiLine = "true", UIMin = "0", UIMax = "10"))
+		TArray<int32> SkillIndex;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Defaults", meta = (MultiLine = "true", UIMin = "0", UIMax = "10"))
 		TArray<UTexture2D*> Skill;
 };
 

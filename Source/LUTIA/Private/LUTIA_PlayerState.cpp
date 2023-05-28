@@ -27,6 +27,7 @@ ALUTIA_PlayerState::ALUTIA_PlayerState()
 	{
 		FSkillPresetImg img;
 		img.Skill.Init(DefaultSkillImg.Object, 4);
+		img.SkillIndex.Init(-1, 4);
 		SkillPreset.SkillImg.Init(img, 4);
 	}
 
@@ -67,8 +68,11 @@ void ALUTIA_PlayerState::SavePlayerState_Implementation(ULUTIA_SaveGame* SaveObj
 
 		for (int i = 0; i < 4; i++) {
 			ImgData.Skill.Empty();
-			for (int j = 0; j < 4; j++)
+			ImgData.SkillIndex.Empty();
+			for (int j = 0; j < 4; j++) {
 				ImgData.Skill.Emplace(SkillPreset.SkillImg[i].Skill[j]);
+				ImgData.SkillIndex.Emplace(SkillPreset.SkillImg[i].SkillIndex[i]);
+			}
 			SaveData.SkillPreset.SkillImg.Emplace(ImgData);
 		}
 
@@ -116,8 +120,11 @@ void ALUTIA_PlayerState::LoadPlayerState_Implementation(ULUTIA_SaveGame* SaveObj
 
 			for (int i = 0; i < 4; i++) {
 				ImgData.Skill.Empty();
-				for (int j = 0; j < 4; j++)
+				ImgData.SkillIndex.Empty();
+				for (int j = 0; j < 4; j++) {
 					ImgData.Skill.Emplace(FoundData->SkillPreset.SkillImg[i].Skill[j]);
+					ImgData.SkillIndex.Emplace(FoundData->SkillPreset.SkillImg[i].SkillIndex[j]);
+				}
 				SkillPreset.SkillImg.Emplace(ImgData);
 			}
 
