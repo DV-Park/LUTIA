@@ -49,7 +49,7 @@ public:
 	TObjectPtr<USkyLightComponent> SkyLightComp;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default", meta = (UIMin = "0", UIMax = "2400"))
-	float TimeOfDay{ 610.0f };
+	float TimeOfDay{ 1200.0f };
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGmWeatherSettings GMWeatherSettings;
@@ -90,6 +90,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable)
 	void SetSunRot(float InTime);
 
 public:	

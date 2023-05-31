@@ -13,5 +13,4 @@ UCLASS()
 class LUTIA_API ALUTIAGameState : public AGameStateBase
 {
 	GENERATED_BODY()
-	
 };
