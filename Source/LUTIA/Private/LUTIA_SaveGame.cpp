@@ -69,7 +69,6 @@ bool ULUTIA_SaveGame::OverrideSpawnTransform(AController* NewPlayer)
 		FPlayerSaveData* FoundData = this->GetPlayerData(PS);
 		if (FoundData && FoundData->bResumeAtTransform)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Set Player Info"));
 			MyPawn->SetActorLocation(FoundData->Location);
 			MyPawn->SetActorRotation(FoundData->Rotation);
 
@@ -87,7 +86,6 @@ bool ULUTIA_SaveGame::OverrideSpawnTransform(AController* NewPlayer)
 
 void ULUTIA_SaveGame::WriteSaveGame(UWorld* CurrentWorld)
 {
-	UE_LOG(LogTemp, Error, TEXT("Created New SaveGame Data."));
 
 	this->SavedPlayers.Empty();
 	this->SavedActors.Empty();
@@ -161,7 +159,6 @@ void ULUTIA_SaveGame::LoadSaveGame(UWorld* CurrentWorld)
 			{
 				if (ActorData.ActorName == Actor->GetFName())
 				{
-					UE_LOG(LogTemp, Error, TEXT("Actor Loaded : %s"), *Actor->GetFName().ToString());
 					Actor->SetActorTransform(ActorData.Transform);
 
 					FMemoryReader MemReader(ActorData.ByteData);
@@ -179,7 +176,6 @@ void ULUTIA_SaveGame::LoadSaveGame(UWorld* CurrentWorld)
 		}
 
 		OnSaveGameLoaded.Broadcast(this);
-		UE_LOG(LogTemp, Error, TEXT("Load Successed"));
 	}
 	else
 	{
@@ -198,7 +194,6 @@ void ULUTIA_SaveGame::LoadActorSave(AActor* CurrentActor)
 		{
 			if (ActorData.ActorName == CurrentActor->GetFName())
 			{
-				UE_LOG(LogTemp, Error, TEXT("Actor Loaded : %s"), *CurrentActor->GetFName().ToString());
 				CurrentActor->SetActorTransform(ActorData.Transform);
 
 				FMemoryReader MemReader(ActorData.ByteData);

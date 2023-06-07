@@ -291,7 +291,6 @@ void ALUTIACharacter::InitializeAttributes()
 
 	if (!DefaultAttributes)
 	{
-		UE_LOG(LogTemp, Error, TEXT("%s() Missing DefaultAttributes for %s. plear fill in the Character's Blueprint."), *FString(__FUNCTION__), *GetName());
 		return;
 	}
 

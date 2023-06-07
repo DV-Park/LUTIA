@@ -47,10 +47,7 @@ void ALUTIAGameMode::LoadCharacterInfo()
 	if (PC != nullptr) {
 		SaveGame->HandleStartingNewPlayer(PC);
 		SaveGame->LoadSaveGame(GetWorld());
-		UE_LOG(LogTemp, Error, TEXT("Character Load Successed"));
 	}
-	else
-		UE_LOG(LogTemp, Error, TEXT("Controller is nullptr"));
 
 }
 

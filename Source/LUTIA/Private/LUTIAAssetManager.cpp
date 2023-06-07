@@ -8,5 +8,4 @@ void ULUTIAAssetManager::StartInitialLoading()
 {
 	Super::StartInitialLoading();
 	UAbilitySystemGlobals::Get().InitGlobalData();
-	UE_LOG(LogTemp, Error, TEXT("Hello World!"));
 }
