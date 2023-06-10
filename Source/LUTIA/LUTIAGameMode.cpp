@@ -31,14 +31,17 @@ void ALUTIAGameMode::InitGame(const FString& MapName, const FString& Options, FS
 		SaveGame = Cast<ULUTIA_SaveGame>(UGameplayStatics::LoadGameFromSlot("UserData", 0));
 		SaveGame->LoadSaveGame(GetWorld());
 	}
-	else
+	else {
 		SaveGame = Cast<ULUTIA_SaveGame>(UGameplayStatics::CreateSaveGameObject(ULUTIA_SaveGame::StaticClass()));
+		WriteSaveGame();
+	}
 
 }
 
 void ALUTIAGameMode::WriteSaveGame()
 {
-	SaveGame->WriteSaveGame(GetWorld());
+	if(SaveGame)
+		SaveGame->WriteSaveGame(GetWorld());
 }
 
 void ALUTIAGameMode::LoadCharacterInfo()
@@ -53,6 +56,7 @@ void ALUTIAGameMode::LoadCharacterInfo()
 
 void ALUTIAGameMode::LoadActorData(AActor* CurrentActor)
 {
-	SaveGame->LoadActorSave(CurrentActor);
+	if(SaveGame)
+		SaveGame->LoadActorSave(CurrentActor);
 }
 
